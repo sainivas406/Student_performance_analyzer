@@ -1,0 +1,93 @@
+-- LOGIN QUERY
+-- Used for verifying username and password during login
+SELECT id, username, role
+FROM users
+WHERE username=%s
+AND password_hash=%s
+AND is_active=1;
+
+-- ADD STUDENT
+-- Used for inserting new student records
+INSERT INTO students(name, department, marks, user_id)
+VALUES(%s,%s,%s,%s);
+
+-- VIEW STUDENTS
+-- Used for displaying all student records
+SELECT id, name, department, marks, user_id
+FROM students
+ORDER BY id;
+
+-- SEARCH BY DEPARTMENT
+-- Used for searching students department-wise
+SELECT id, name, department, marks, user_id
+FROM students
+WHERE LOWER(department)=LOWER(%s);
+
+-- UPDATE STUDENT
+-- Used for updating student marks
+UPDATE students
+SET marks=%s
+WHERE id=%s;
+
+-- DELETE STUDENT
+-- Used for deleting student records
+DELETE FROM students
+WHERE id=%s;
+
+-- DASHBOARD ANALYTICS
+-- Used for calculating analytics data
+SELECT
+COUNT(*),
+AVG(marks),
+MAX(marks),
+MIN(marks)
+FROM students;
+
+-- GRADE DISTRIBUTION
+-- Used for calculating grade distribution
+SELECT
+SUM(CASE WHEN marks >=90 THEN 1 ELSE 0 END),
+SUM(CASE WHEN marks BETWEEN 75 AND 89 THEN 1 ELSE 0 END),
+SUM(CASE WHEN marks BETWEEN 60 AND 74 THEN 1 ELSE 0 END),
+SUM(CASE WHEN marks BETWEEN 40 AND 59 THEN 1 ELSE 0 END),
+SUM(CASE WHEN marks <40 THEN 1 ELSE 0 END)
+FROM students;
+
+-- TOP PERFORMERS
+-- Used for displaying top 3 students
+SELECT name, department, marks
+FROM students
+ORDER BY marks DESC
+LIMIT 3;
+
+-- DEPARTMENT LEADERBOARD
+-- Used for ranking departments
+SELECT department, AVG(marks)
+FROM students
+GROUP BY department
+ORDER BY AVG(marks) DESC;
+
+-- BONUS MARKS
+-- Used for adding bonus marks department-wise
+UPDATE students
+SET marks = LEAST(marks + %s, 100)
+WHERE department=%s;
+
+-- EXPORT HIGH PERFORMERS
+-- Used for exporting students above average marks
+SELECT *
+FROM students
+WHERE marks >
+(SELECT AVG(marks) FROM students);
+
+-- AUDIT LOG
+-- Used for storing activity logs
+INSERT INTO audit_log(user_id, action, details)
+VALUES(%s,%s,%s);
+
+mysql> INSERT INTO users(username,password_hash,role)
+    -> VALUES(
+    -> 'admin',
+    -> '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
+    -> 'admin'
+    -> );
